@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대시보드 — Eternal</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+
+  <!-- 네비게이션 -->
+  <nav class="navbar">
+    <a href="{% url 'dashboard' %}" class="navbar-brand">💍 Eternal</a>
+    <div class="navbar-right">
+      <span class="navbar-user">{{ request.user.first_name }}님</span>
+      <a href="{% url 'logout' %}" class="btn-logout">로그아웃</a>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div class="message-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h1 class="page-title">내 청첩장 관리</h1>
+    <p class="page-subtitle">청첩장을 만들고 하객들과 공유하세요</p>
+
+    <!-- 청첩장 생성 폼 -->
+    <div class="form-section">
+      <h2>✨ 새 청첩장 만들기</h2>
+
+      <form method="POST" action="{% url 'create_wedding' %}" enctype="multipart/form-data" id="wedding-form">
+        {% csrf_token %}
+
+        <!-- 대표 사진 -->
+        <span class="form-label">대표 사진 (표지용)</span>
+        <div class="photo-orientation">
+          <button type="button" class="orientation-btn active" onclick="setOrientation('landscape', this)">
+            🖼 가로형
+          </button>
+          <button type="button" class="orientation-btn" onclick="setOrientation('portrait', this)">
+            📱 세로형
+          </button>
+        </div>
+        <input type="hidden" name="photo_orientation" id="photo_orientation" value="landscape">
+
+        <div class="photo-upload" onclick="document.getElementById('photo-input').click()">
+          <img id="photo-preview" src="" alt="" style="display:none">
+          <p id="photo-placeholder">📷 클릭해서 대표 사진 업로드</p>
+        </div>
+        <input type="file" id="photo-input" name="photo" accept="image/*" style="display:none"
+          onchange="previewPhoto(this)">
+
+        <!-- 기본 정보 -->
+        <span class="form-label">기본 정보 *</span>
+        <div class="form-row">
+          <input type="text" name="groom_name" placeholder="신랑 이름 *" required>
+          <input type="text" name="bride_name" placeholder="신부 이름 *" required>
+        </div>
+        <div class="form-row">
+          <input type="date" name="wedding_date" required>
+          <input type="text" name="venue" placeholder="예식장 이름 *" required>
+        </div>
+        <input type="text" name="venue2" placeholder="상세 주소">
+        <input type="url" name="map_url" placeholder="지도 링크 (네이버/카카오 지도 URL)">
+        <textarea name="message" placeholder="청첩장 메시지 (인사말)" rows="3"></textarea>
+
+        <!-- 연락처 -->
+        <span class="form-label">연락처</span>
+        <div class="form-row">
+          <input type="tel" name="groom_phone" placeholder="신랑 연락처">
+          <input type="tel" name="bride_phone" placeholder="신부 연락처">
+        </div>
+
+        <!-- 계좌번호 -->
+        <span class="form-label">계좌번호</span>
+        <input type="text" name="groom_account" placeholder="신랑 계좌번호 (예: 신한 110-123-456789)">
+        <input type="text" name="bride_account" placeholder="신부 계좌번호 (예: 국민 123456-78-987654)">
+
+        <!-- 갤러리 -->
+        <span class="form-label">갤러리 사진 (최대 8장)</span>
+        <div class="gallery-upload" onclick="document.getElementById('gallery-input').click()">
+          <p>📸 클릭해서 갤러리 사진 선택 (6~8장)</p>
+          <div class="gallery-preview" id="gallery-preview"></div>
+        </div>
+        <input type="file" id="gallery-input" name="gallery_files" accept="image/*"
+          multiple style="display:none" onchange="previewGallery(this)">
+
+        <!-- 테마 -->
+        <span class="form-label">테마 선택</span>
+        <input type="hidden" name="theme" id="theme-input" value="classic">
+        <div class="theme-grid">
+          <div class="theme-card active" onclick="setTheme('classic', this)">
+            <div class="theme-circle classic"></div>
+            <p class="theme-name">Classic</p>
+            <p class="theme-desc">크림 / 골드</p>
+          </div>
+          <div class="theme-card" onclick="setTheme('modern', this)">
+            <div class="theme-circle modern"></div>
+            <p class="theme-name">Modern</p>
+            <p class="theme-desc">화이트 / 블랙</p>
+          </div>
+          <div class="theme-card" onclick="setTheme('romantic', this)">
+            <div class="theme-circle romantic"></div>
+            <p class="theme-name">Romantic</p>
+            <p class="theme-desc">핑크 / 로즈</p>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn-preview" onclick="showPreview()">미리보기</button>
+          <button type="submit" class="btn-primary" style="flex:2">청첩장 생성</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 청첩장 목록 -->
+    <div class="list-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <h2 style="margin-bottom:0">내 청첩장 목록</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn-select-delete" onclick="deleteSelected()">
+            선택 삭제 (<span id="selected-count">0</span>)
+          </button>
+          <button class="btn-delete-all" onclick="deleteAll()">
+            전체 삭제
+          </button>
+        </div>
+      </div>
+
+      {% if weddings %}
+        {% for wedding in weddings %}
+        <div class="wedding-card" id="card-{{ wedding.pk }}">
+          <input type="checkbox" class="wedding-checkbox"
+            onchange="updateCount()"
+            data-id="{{ wedding.pk }}"
+            style="width:18px;height:18px;margin-right:12px;
+                   accent-color:var(--gold);cursor:pointer;flex-shrink:0">
+
+          {% if wedding.photo %}
+            <img class="wedding-thumb" src="{{ wedding.photo.url }}" alt="썸네일">
+          {% else %}
+            <div class="wedding-thumb-placeholder">💍</div>
+          {% endif %}
+
+          <div class="wedding-info">
+            <div class="wedding-names">
+              {{ wedding.groom_name }}
+              <span class="ampersand">&</span>
+              {{ wedding.bride_name }}
+            </div>
+            <p class="wedding-meta">📅 {{ wedding.wedding_date }} &nbsp;|&nbsp; 📍 {{ wedding.venue }}</p>
+            <span class="wedding-theme-badge">{{ wedding.get_theme_display }}</span>
+            <button class="btn-share" onclick="copyLink('{{ wedding.share_code }}')"
+              style="margin-top:8px;display:inline-block">
+              🔗 공유 링크 복사
+            </button>
+          </div>
+
+          <div class="wedding-actions">
+            <a href="{% url 'wedding_page' wedding.share_code %}" class="btn-view" target="_blank">보기</a>
+            <a href="{% url 'edit_wedding' wedding.pk %}" class="btn-edit">수정</a>
+            <form method="POST" action="{% url 'delete_wedding' wedding.pk %}"
+              style="display:inline" class="delete-form"
+              onsubmit="return confirm('삭제할까요?')">
+              {% csrf_token %}
+              <button type="submit" class="btn-delete">삭제</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <p style="font-size:32px">💍</p>
+          <p>아직 만든 청첩장이 없어요</p>
+          <p style="margin-top:8px;font-size:11px">위 폼을 작성해서 첫 번째 청첩장을 만들어보세요!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 미리보기 모달 -->
+  <div id="preview-modal" style="display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.75);z-index:1000;align-items:center;
+    justify-content:center;padding:24px;overflow-y:auto">
+    <div id="preview-box" style="max-width:480px;width:100%;
+      max-height:90vh;overflow-y:auto;border-radius:4px;position:relative">
+      <button onclick="closePreview()" style="position:sticky;top:0;float:right;
+        margin:12px 12px 0 0;background:rgba(0,0,0,0.5);border:none;color:#fff;
+        width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;
+        z-index:10;display:flex;align-items:center;justify-content:center">✕</button>
+      <div id="preview-content" style="padding:48px 36px;text-align:center;clear:both"></div>
+    </div>
+  </div>
+
+  <script>
+    const themeColors = {
+      classic:  { accent:'#c9a84c', bg:'#faf6f0', text:'#4a3f2f', sub:'#8a7a65', border:'#e8d5a3' },
+      modern:   { accent:'#1a1a1a', bg:'#f5f5f5', text:'#1a1a1a', sub:'#888888', border:'#e0e0e0' },
+      romantic: { accent:'#d4849a', bg:'#fff5f7', text:'#5c3040', sub:'#b5637a', border:'#f5c6d0' },
+    }
+
+    // 미리보기
+    function showPreview() {
+      const groomName   = document.querySelector('[name=groom_name]').value || '신랑'
+      const brideName   = document.querySelector('[name=bride_name]').value || '신부'
+      const weddingDate = document.querySelector('[name=wedding_date]').value || 'YYYY-MM-DD'
+      const venue       = document.querySelector('[name=venue]').value || ''
+      const venue2      = document.querySelector('[name=venue2]').value || ''
+      const message     = document.querySelector('[name=message]').value || ''
+      const groomPhone  = document.querySelector('[name=groom_phone]').value || ''
+      const bridePhone  = document.querySelector('[name=bride_phone]').value || ''
+      const groomAcc    = document.querySelector('[name=groom_account]').value || ''
+      const brideAcc    = document.querySelector('[name=bride_account]').value || ''
+      const theme       = document.getElementById('theme-input').value
+      const photoSrc    = document.getElementById('photo-preview').src
+      const hasPhoto    = document.getElementById('photo-preview').style.display !== 'none' && photoSrc
+
+      const c = themeColors[theme] || themeColors.classic
+
+      document.getElementById('preview-box').style.background = c.bg
+
+      document.getElementById('preview-content').innerHTML = `
+        ${hasPhoto ? `<img src="${photoSrc}" style="width:calc(100% + 72px);margin:-48px -36px 36px;height:240px;object-fit:cover;display:block">` : ''}
+        <p style="font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:${c.sub};margin-bottom:24px;font-family:'Montserrat',sans-serif">
+          Wedding Invitation
+        </p>
+        <h2 style="font-size:34px;font-weight:400;color:${c.text};margin-bottom:16px;font-family:'Cormorant Garamond',serif">
+          ${groomName}
+          <span style="color:${c.accent};font-style:italic;margin:0 12px">&</span>
+          ${brideName}
+        </h2>
+        <div style="width:40px;height:1px;background:${c.accent};margin:0 auto 16px"></div>
+        <p style="font-size:13px;letter-spacing:0.25em;color:${c.sub};margin-bottom:6px;font-family:'Montserrat',sans-serif">${weddingDate}</p>
+        ${venue ? `<p style="font-size:13px;color:${c.sub};margin-bottom:4px;font-family:'Montserrat',sans-serif">${venue}</p>` : ''}
+        ${venue2 ? `<p style="font-size:12px;color:${c.sub};margin-bottom:4px;font-family:'Montserrat',sans-serif">${venue2}</p>` : ''}
+        ${message ? `
+          <div style="display:flex;align-items:center;gap:12px;margin:24px 0">
+            <div style="flex:1;height:1px;background:${c.border}"></div>
+            <span style="color:${c.accent}">✦</span>
+            <div style="flex:1;height:1px;background:${c.border}"></div>
+          </div>
+          <p style="font-style:italic;font-size:14px;color:${c.text};line-height:1.9;opacity:0.85;white-space:pre-line;font-family:'Cormorant Garamond',serif">"${message}"</p>
+        ` : ''}
+        ${(groomPhone || bridePhone) ? `
+          <div style="text-align:left;margin:20px 0;padding:16px;background:rgba(0,0,0,0.03)">
+            <p style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:${c.sub};margin-bottom:10px;font-family:'Montserrat',sans-serif">연락처</p>
+            ${groomPhone ? `<p style="font-size:13px;color:${c.text};margin-bottom:6px;font-family:'Montserrat',sans-serif">👦 ${groomName}: ${groomPhone}</p>` : ''}
+            ${bridePhone ? `<p style="font-size:13px;color:${c.text};font-family:'Montserrat',sans-serif">👰 ${brideName}: ${bridePhone}</p>` : ''}
+          </div>
+        ` : ''}
+        ${(groomAcc || brideAcc) ? `
+          <div style="text-align:left;margin:20px 0;padding:16px;background:rgba(0,0,0,0.03)">
+            <p style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:${c.sub};margin-bottom:10px;font-family:'Montserrat',sans-serif">마음 전하는 곳</p>
+            ${groomAcc ? `<p style="font-size:13px;color:${c.text};margin-bottom:6px;font-family:'Montserrat',sans-serif">👦 ${groomName}: ${groomAcc}</p>` : ''}
+            ${brideAcc ? `<p style="font-size:13px;color:${c.text};font-family:'Montserrat',sans-serif">👰 ${brideName}: ${brideAcc}</p>` : ''}
+          </div>
+        ` : ''}
+      `
+
+      const modal = document.getElementById('preview-modal')
+      modal.style.display = 'flex'
+    }
+
+    function closePreview() {
+      document.getElementById('preview-modal').style.display = 'none'
+    }
+
+    // 체크박스
+    function updateCount() {
+      const count = document.querySelectorAll('.wedding-checkbox:checked').length
+      document.getElementById('selected-count').textContent = count
+    }
+
+    // 선택 삭제
+    function deleteSelected() {
+      const checked = document.querySelectorAll('.wedding-checkbox:checked')
+      if (checked.length === 0) { alert('삭제할 청첩장을 선택해주세요.'); return }
+      if (!confirm(`선택한 ${checked.length}개를 삭제할까요?`)) return
+      checked.forEach(cb => {
+        const form = document.querySelector(`#card-${cb.dataset.id} .delete-form`)
+        if (form) form.submit()
+      })
+    }
+
+    // 전체 삭제
+    function deleteAll() {
+      const cards = document.querySelectorAll('.wedding-checkbox')
+      if (cards.length === 0) { alert('삭제할 청첩장이 없어요.'); return }
+      if (!confirm(`전체 ${cards.length}개를 모두 삭제할까요?`)) return
+      cards.forEach(cb => {
+        const form = document.querySelector(`#card-${cb.dataset.id} .delete-form`)
+        if (form) form.submit()
+      })
+    }
+
+    // 테마 선택
+    function setTheme(theme, el) {
+      document.getElementById('theme-input').value = theme
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'))
+      el.classList.add('active')
+    }
+
+    // 사진 방향
+    function setOrientation(val, el) {
+      document.getElementById('photo_orientation').value = val
+      document.querySelectorAll('.orientation-btn').forEach(b => b.classList.remove('active'))
+      el.classList.add('active')
+    }
+
+    // 대표 사진 미리보기
+    function previewPhoto(input) {
+      const file = input.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const preview = document.getElementById('photo-preview')
+        preview.src = e.target.result
+        preview.style.display = 'block'
+        document.getElementById('photo-placeholder').style.display = 'none'
+      }
+      reader.readAsDataURL(file)
+    }
+
+    // 갤러리 미리보기
+    function previewGallery(input) {
+      const files = Array.from(input.files).slice(0, 8)
+      if (files.length < 6) { alert('사진을 최소 6장 선택해주세요.'); return }
+      const preview = document.getElementById('gallery-preview')
+      preview.innerHTML = ''
+      files.forEach(file => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const img = document.createElement('img')
+          img.src = e.target.result
+          preview.appendChild(img)
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+
+    // 공유 링크 복사
+    function copyLink(shareCode) {
+      const url = `${window.location.origin}/dashboard/w/${shareCode}/`
+      navigator.clipboard.writeText(url).then(() => {
+        alert('공유 링크가 복사됐어요! 하객들에게 보내주세요 💌')
+      })
+    }
+  </script>
+</body>
+</html>

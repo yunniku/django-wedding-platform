@@ -1,0 +1,306 @@
+/* static/css/auth.css */
+
+.auth-page {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: #faf6f0;
+  }
+  
+  /* 배경 그라데이션 */
+  .auth-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(201,168,76,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(201,168,76,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  
+  /* 떠다니는 꽃잎 */
+  .petal {
+    position: fixed;
+    top: -40px;
+    font-size: 22px;
+    opacity: 0.8;
+    animation: falling linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  @keyframes falling {
+    0%   { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+  
+  .auth-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+  }
+  
+  .auth-box {
+    background: rgba(255,255,255,0.93);
+    backdrop-filter: blur(20px);
+    padding: 36px 44px 32px;
+    box-shadow:
+      0 4px 24px rgba(201,168,76,0.08),
+      0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid rgba(201,168,76,0.18);
+    position: relative;
+  }
+  
+  /* 박스 모서리 장식 */
+  .auth-box::before,
+  .auth-box::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: rgba(201,168,76,0.4);
+    border-style: solid;
+  }
+  
+  .auth-box::before {
+    top: 10px;
+    left: 10px;
+    border-width: 1px 0 0 1px;
+  }
+  
+  .auth-box::after {
+    bottom: 10px;
+    right: 10px;
+    border-width: 0 1px 1px 0;
+  }
+  
+  /* 로고 */
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .auth-logo-ring {
+    font-size: 26px;
+    margin-bottom: 8px;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  
+  .auth-logo h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  
+  .auth-logo p {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+  
+  /* 장식 구분선 */
+  .auth-divider-deco {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 18px;
+  }
+  
+  .auth-divider-deco::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border));
+  }
+  
+  .auth-divider-deco::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to left, transparent, var(--border));
+  }
+  
+  .auth-divider-deco span {
+    font-size: 12px;
+    color: var(--gold);
+    opacity: 0.6;
+  }
+  
+  /* 제목 */
+  .auth-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    font-weight: 400;
+  }
+  
+  /* 입력창 */
+  .form-group {
+    margin-bottom: 18px;
+    position: relative;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    transition: color 0.3s;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    outline: none;
+    transition: all 0.3s;
+    margin-bottom: 0;
+    border-radius: 0;
+  }
+  
+  .form-group input:focus {
+    border-bottom-color: var(--gold);
+    background: transparent;
+    box-shadow: none;
+  }
+  
+  /* 포커스 언더라인 애니메이션 */
+  .form-group::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transition: all 0.4s ease;
+    transform: translateX(-50%);
+  }
+  
+  .form-group:focus-within::after { width: 100%; }
+  .form-group:focus-within label { color: var(--gold); }
+  
+  /* 버튼 */
+  .btn-auth-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--gold) 0%, #b8923e 100%);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-auth-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .btn-auth-primary:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .btn-auth-primary:hover {
+    box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+    transform: translateY(-1px);
+  }
+  
+  /* or 구분선 */
+  .auth-or {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  
+  .auth-or::before,
+  .auth-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  
+  .auth-or span {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-light);
+  }
+  
+  /* 아웃라인 버튼 */
+  .btn-auth-outline {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--gold);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border: 1px solid rgba(201,168,76,0.4);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+  }
+  
+  .btn-auth-outline:hover {
+    background: var(--gold);
+    color: #fff;
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+  }
+  
+  @media (max-width: 480px) {
+    .auth-box { padding: 28px 24px; }
+    .auth-logo h1 { font-size: 30px; }
+  }

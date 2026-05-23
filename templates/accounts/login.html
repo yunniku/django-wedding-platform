@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 — Eternal</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body class="auth-page">
+
+  <!-- 꽃잎 애니메이션 -->
+  <div class="petal" style="left:10%;animation-duration:8s;animation-delay:0s">🌸</div>
+  <div class="petal" style="left:25%;animation-duration:11s;animation-delay:2s">🌸</div>
+  <div class="petal" style="left:40%;animation-duration:9s;animation-delay:4s">🌸</div>
+  <div class="petal" style="left:60%;animation-duration:12s;animation-delay:1s">🌸</div>
+  <div class="petal" style="left:75%;animation-duration:10s;animation-delay:3s">🌸</div>
+  <div class="petal" style="left:90%;animation-duration:8s;animation-delay:5s">🌸</div>
+
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <span class="auth-logo-ring">💍</span>
+        <h1>Eternal</h1>
+        <div class="auth-divider-deco"><span>✦</span></div>
+        <p>Wedding Invitation Platform</p>
+      </div>
+
+      <p class="auth-title">로그인</p>
+
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>이메일</label>
+          <input type="email" name="email" placeholder="이메일을 입력하세요" required>
+        </div>
+        <div class="form-group">
+          <label>비밀번호</label>
+          <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
+        </div>
+        <button type="submit" class="btn-auth-primary">로그인</button>
+      </form>
+
+      <div class="auth-or"><span>or</span></div>
+
+      <a href="{% url 'register' %}" class="btn-auth-outline">회원가입</a>
+    </div>
+  </div>
+</body>
+</html>

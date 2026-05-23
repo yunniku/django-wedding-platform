@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ wedding.groom_name }} ♥ {{ wedding.bride_name }}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/wedding.css' %}">
+  <style>
+    {% if wedding.theme == 'classic' %}
+    :root {
+      --accent: #c9a84c; --bg: #faf6f0; --card: #ffffff;
+      --text: #4a3f2f; --sub: #8a7a65; --border: #e8d5a3;
+      --font: 'Cormorant Garamond', serif;
+    }
+    {% elif wedding.theme == 'modern' %}
+    :root {
+      --accent: #1a1a1a; --bg: #f5f5f5; --card: #ffffff;
+      --text: #1a1a1a; --sub: #888888; --border: #e0e0e0;
+      --font: 'Montserrat', sans-serif;
+    }
+    {% else %}
+    :root {
+      --accent: #d4849a; --bg: #fff5f7; --card: #ffffff;
+      --text: #5c3040; --sub: #b5637a; --border: #f5c6d0;
+      --font: 'Playfair Display', serif;
+    }
+    {% endif %}
+    body { background: var(--bg); font-family: var(--font); }
+    .section-bg-card { background: var(--card); }
+    .section-bg-main { background: var(--bg); }
+    .gallery-section { background: var(--bg); }
+  </style>
+</head>
+<body>
+
+  <button class="bgm-btn" id="bgm-btn" onclick="toggleBGM()">🔇</button>
+  <audio id="bgm" loop src="{% static 'bgm.mp3' %}"></audio>
+
+  <!-- 1. 표지 -->
+  <section class="cover">
+    {% if wedding.photo %}
+    <div class="cover-bg" style="background-image: url('{{ wedding.photo.url }}')"></div>
+    {% else %}
+    <div class="cover-bg-plain"></div>
+    {% endif %}
+
+    <div class="cover-content">
+      {% if days_left is not None %}
+      <div class="dday-badge {% if not wedding.photo %}no-photo{% endif %}">
+        {% if days_left > 0 %}D - {{ days_left }}
+        {% elif days_left == 0 %}D - DAY
+        {% else %}D + {{ days_left|cut:"-" }}
+        {% endif %}
+      </div>
+      {% endif %}
+      <p class="cover-label {% if wedding.photo %}has-photo{% else %}no-photo{% endif %}">Wedding Invitation</p>
+      <h1 class="cover-names {% if wedding.photo %}has-photo{% else %}no-photo{% endif %}">
+        {{ wedding.groom_name }}<span class="amp">&</span>{{ wedding.bride_name }}
+      </h1>
+      <div class="cover-line" style="background: {% if wedding.photo %}rgba(255,255,255,0.6){% else %}var(--accent){% endif %}"></div>
+      <p class="cover-date {% if wedding.photo %}has-photo{% else %}no-photo{% endif %}">{{ wedding.wedding_date }}</p>
+      <p class="cover-venue {% if wedding.photo %}has-photo{% else %}no-photo{% endif %}">{{ wedding.venue }}</p>
+    </div>
+
+    <div class="scroll-hint">
+      <p style="color: {% if wedding.photo %}rgba(255,255,255,0.6){% else %}var(--sub){% endif %}">Scroll Down</p>
+      <div class="scroll-line" style="background: {% if wedding.photo %}rgba(255,255,255,0.4){% else %}var(--accent){% endif %}"></div>
+    </div>
+  </section>
+
+  <!-- 2. 인사말 -->
+  <section class="section section-bg-card">
+    <div class="section-inner">
+      <p class="section-label">Greeting</p>
+      <div class="section-line"></div>
+      <p class="greeting-text">{{ wedding.message|default:"서로의 마음을 확인하며\n함께 걸어갈 새로운 길 위에 서게 되었습니다.\n\n귀한 걸음으로 축하해 주시면 감사하겠습니다." }}</p>
+      <div class="section-line" style="margin-top:48px;margin-bottom:0"></div>
+    </div>
+  </section>
+
+  <!-- 3. 오시는 길 -->
+  <section class="section section-bg-main">
+    <div class="section-inner">
+      <p class="section-label">Date & Venue</p>
+      <div class="venue-card">
+        <p class="venue-name">{{ wedding.venue }}</p>
+        {% if wedding.venue2 %}<p class="venue-address">{{ wedding.venue2 }}</p>{% endif %}
+        <p class="venue-date">{{ wedding.wedding_date }}</p>
+        <div id="kakao-map" style="width:100%;height:280px;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,0.08);margin-top:20px"></div>
+        {% if wedding.map_url %}
+        <a href="{{ wedding.map_url }}" target="_blank"
+          style="display:block;text-align:center;margin-top:12px;font-size:11px;
+                 color:var(--sub);letter-spacing:0.15em;font-family:'Montserrat',sans-serif;
+                 text-decoration:none;text-transform:uppercase">
+          지도 자세히 보기 →
+        </a>
+        {% endif %}
+      </div>
+
+      {% if wedding.groom_phone or wedding.groom_account %}
+      <p class="section-label" style="margin-top:48px">Contact & Account</p>
+      <div class="contact-card">
+        <p class="contact-name">👦 신랑 {{ wedding.groom_name }}</p>
+        {% if wedding.groom_phone %}
+        <div class="contact-row">
+          <span class="contact-info">📞 {{ wedding.groom_phone }}</span>
+          <a href="tel:{{ wedding.groom_phone }}" class="btn-small">전화하기</a>
+        </div>
+        {% endif %}
+        {% if wedding.groom_account %}
+        <div class="contact-row">
+          <span class="contact-info">💳 {{ wedding.groom_account }}</span>
+          <button class="btn-small btn-accent" onclick="copyText('{{ wedding.groom_account }}', this)">계좌 복사</button>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if wedding.bride_phone or wedding.bride_account %}
+      <div class="contact-card">
+        <p class="contact-name">👰 신부 {{ wedding.bride_name }}</p>
+        {% if wedding.bride_phone %}
+        <div class="contact-row">
+          <span class="contact-info">📞 {{ wedding.bride_phone }}</span>
+          <a href="tel:{{ wedding.bride_phone }}" class="btn-small">전화하기</a>
+        </div>
+        {% endif %}
+        {% if wedding.bride_account %}
+        <div class="contact-row">
+          <span class="contact-info">💳 {{ wedding.bride_account }}</span>
+          <button class="btn-small btn-accent" onclick="copyText('{{ wedding.bride_account }}', this)">계좌 복사</button>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <p class="eco-msg">환경 보호를 위해 화환은 정중히 사양합니다</p>
+    </div>
+  </section>
+
+  <!-- 4. 갤러리 -->
+  {% if galleries %}
+  <section class="gallery-section">
+    <p class="section-label" style="padding-top:60px">Gallery</p>
+    <div class="carousel-wrap">
+      <div class="carousel-track" id="carousel">
+        {% for img_url in galleries %}
+        <img src="{{ img_url }}" alt="gallery" onclick="openLightbox('{{ img_url }}')">
+        {% endfor %}
+      </div>
+      <button class="carousel-btn prev" onclick="moveCarousel(-1)">◀</button>
+      <button class="carousel-btn next" onclick="moveCarousel(1)">▶</button>
+    </div>
+    <div class="carousel-dots" id="dots">
+      {% for img_url in galleries %}
+      <div class="dot"
+        style="width:{% if forloop.first %}20px{% else %}6px{% endif %};background:{% if forloop.first %}var(--accent){% else %}var(--border){% endif %}"
+        onclick="goTo({{ forloop.counter0 }})"></div>
+      {% endfor %}
+    </div>
+    <div style="padding-bottom:60px"></div>
+  </section>
+  {% endif %}
+
+  <div class="lightbox" id="lightbox" style="display:none" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  </div>
+
+  <!-- 5. 방명록 -->
+  <section class="section section-bg-main">
+    <div class="section-inner">
+      <p class="section-label">Guestbook</p>
+      <p style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:32px;font-family:'Montserrat',sans-serif;">
+        축하 메시지를 남겨주세요 💌
+      </p>
+      <form class="guestbook-form" method="POST" action="{% url 'write_guestbook' wedding.pk %}">
+        {% csrf_token %}
+        <input type="text" name="guest_name" placeholder="이름" required>
+        <textarea name="message" placeholder="축하 메시지를 남겨주세요" rows="3" required></textarea>
+        <button type="submit" class="btn-guestbook">방명록 남기기</button>
+      </form>
+      {% if guestbooks %}
+        {% for gb in guestbooks %}
+        <div class="guestbook-item">
+          <p class="guestbook-name">{{ gb.guest_name }}</p>
+          <p class="guestbook-msg">{{ gb.message }}</p>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="empty-gb">아직 방명록이 없어요. 첫 번째로 축하해주세요! 🎉</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- 카카오맵 SDK: body 맨 아래에서 로드! -->
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=94492befcd7011b7bc356508da9264d2&libraries=services&autoload=false"></script>
+
+  <script>
+    function toggleBGM() {
+      const audio = document.getElementById('bgm')
+      const btn = document.getElementById('bgm-btn')
+      if (audio.paused) { audio.play(); btn.textContent = '🔊' }
+      else { audio.pause(); btn.textContent = '🔇' }
+    }
+
+    let current = 0
+    const total = {{ galleries|length }}
+
+    function moveCarousel(dir) {
+      current = (current + dir + total) % total
+      updateCarousel()
+    }
+
+    function goTo(idx) {
+      current = idx
+      updateCarousel()
+    }
+
+    function updateCarousel() {
+      document.getElementById('carousel').style.transform = `translateX(-${current * 100}%)`
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.style.width = i === current ? '20px' : '6px'
+        d.style.background = i === current ? 'var(--accent)' : 'var(--border)'
+      })
+    }
+
+    setInterval(() => moveCarousel(1), 5000)
+
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src
+      document.getElementById('lightbox').style.display = 'flex'
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').style.display = 'none'
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent
+        btn.textContent = '✅ 복사됨'
+        btn.classList.add('copied')
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied') }, 2000)
+      })
+    }
+
+    // 카카오맵: SDK가 위에서 로드됐으므로 바로 사용 가능
+    kakao.maps.load(function() {
+      const mapContainer = document.getElementById('kakao-map')
+      if (!mapContainer) return
+
+      const map = new kakao.maps.Map(mapContainer, {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 3
+      })
+
+      const ps = new kakao.maps.services.Places()
+      ps.keywordSearch('{{ wedding.venue }}', function(data, status) {
+        if (status === kakao.maps.services.Status.OK) {
+          const coords = new kakao.maps.LatLng(data[0].y, data[0].x)
+          map.setCenter(coords)
+
+          const marker = new kakao.maps.Marker({ map: map, position: coords })
+          const infowindow = new kakao.maps.InfoWindow({
+            content: '<div style="padding:8px 12px;font-size:12px;font-family:Montserrat,sans-serif">📍 {{ wedding.venue }}</div>'
+          })
+          infowindow.open(map, marker)
+        }
+      })
+    })
+  </script>
+</body>
+</html>
