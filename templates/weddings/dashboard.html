@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>대시보드 — Eternal</title>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}대시보드 — Eternal{% endblock %}
+
+{% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 
   <!-- 네비게이션 -->
   <nav class="navbar">
@@ -38,6 +37,17 @@
 
       <form method="POST" action="{% url 'create_wedding' %}" enctype="multipart/form-data" id="wedding-form">
         {% csrf_token %}
+
+        {% if form.errors %}
+        <div style="background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:16px;margin-bottom:20px">
+          <p style="color:#cc0000;font-size:13px;margin-bottom:8px">⚠️ 아래 항목을 확인해주세요</p>
+          {% for field in form %}
+            {% if field.errors %}
+              <p style="color:#cc0000;font-size:12px">· {{ field.label }}: {{ field.errors|join:", " }}</p>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
 
         <!-- 대표 사진 -->
         <span class="form-label">대표 사진 (표지용)</span>
@@ -354,5 +364,5 @@
       })
     }
   </script>
-</body>
-</html>
+
+  {% endblock %}

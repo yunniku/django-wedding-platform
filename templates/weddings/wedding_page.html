@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ wedding.groom_name }} ♥ {{ wedding.bride_name }}</title>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ wedding.groom_name }} ♥ {{ wedding.bride_name }}{% endblock %}
+
+{% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/wedding.css' %}">
   <style>
     {% if wedding.theme == 'classic' %}
@@ -32,8 +30,10 @@
     .section-bg-main { background: var(--bg); }
     .gallery-section { background: var(--bg); }
   </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
+
 
   <button class="bgm-btn" id="bgm-btn" onclick="toggleBGM()">🔇</button>
   <audio id="bgm" loop src="{% static 'bgm.mp3' %}"></audio>
@@ -272,5 +272,4 @@
       })
     })
   </script>
-</body>
-</html>
+{% endblock %}

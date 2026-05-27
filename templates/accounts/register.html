@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>회원가입 — Eternal</title>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}회원가입 — Eternal{% endblock %}
+
+{% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/auth.css' %}">
-</head>
-<body class="auth-page">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
 
 <!-- 꽃잎 애니메이션 -->
 <div class="petal" style="left:5%;animation-duration:7s;animation-delay:0s">🌸</div>
@@ -63,5 +64,5 @@
       <a href="{% url 'login' %}" class="btn-auth-outline">로그인으로 돌아가기</a>
     </div>
   </div>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,14 +1,13 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>청첩장 수정 — Eternal</title>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}청첩장 수정 — Eternal{% endblock %}
+
+{% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 
   <!-- 네비게이션 -->
   <nav class="navbar">
@@ -209,5 +208,4 @@
       })
     }
   </script>
-</body>
-</html>
+{% endblock %}

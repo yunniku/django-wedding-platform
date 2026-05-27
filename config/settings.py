@@ -29,8 +29,12 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['django-wedding-platform-production.up.railway.app']
-
+# 수정 후
+ALLOWED_HOSTS = [
+    'django-wedding-platform-production.up.railway.app',
+    '127.0.0.1',
+    'localhost',
+]
 
 # Application definition
 
@@ -136,5 +140,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CSRF_TRUSTED_ORIGINS = ['https://django-wedding-platform-production.up.railway.app']
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+# 수정 후
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

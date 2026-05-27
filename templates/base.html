@@ -1,0 +1,51 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Eternal{% endblock %}</title>
+
+  {% load static %}
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 구글 폰트 -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap">
+
+  <!-- Tailwind 커스텀 설정 (기존 골드 색상 유지) -->
+  <script>
+    tailwind.config = {
+      corePlugins: {
+        preflight: false,  // ← 이거 추가! 기존 CSS 리셋 방지
+      },  
+      theme: {
+        extend: {
+          colors: {
+            gold: '#c9a84c',
+            'gold-dark': '#a07830',
+            'gold-light': '#e8d5a3',
+            cream: '#faf6f0',
+          },
+          fontFamily: {
+            cormorant: ['Cormorant Garamond', 'serif'],
+            montserrat: ['Montserrat', 'sans-serif'],
+            playfair: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- 기존 CSS 유지 (점진적으로 Tailwind로 교체 예정) -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen" style="color:#4a3f2f">
+
+  {% block content %}
+  {% endblock %}
+
+</body>
+</html>
